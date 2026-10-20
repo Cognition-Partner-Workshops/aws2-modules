@@ -1,0 +1,3 @@
+skip-check:
+  - CKV_AWS_144 # Cross-region replication is governed by the bank's separate recovery program.
+  - CKV2_AWS_62 # These workloads do not consume S3 event notifications.

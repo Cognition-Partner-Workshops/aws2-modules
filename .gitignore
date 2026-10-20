@@ -1,0 +1,10 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+plan.json
+checkov.json
+*.zip
+.pytest_cache/
+__pycache__/

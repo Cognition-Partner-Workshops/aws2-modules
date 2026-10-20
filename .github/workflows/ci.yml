@@ -1,0 +1,30 @@
+name: Terraform module examples
+
+on:
+  pull_request:
+
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install checkov==3.3.11
+      - name: Format
+        run: terraform fmt -check -recursive
+      - name: Validate and plan examples
+        shell: bash
+        run: |
+          set -euo pipefail
+          for exampleDir in examples/*; do
+            terraform -chdir="$exampleDir" init -backend=false -input=false
+            terraform -chdir="$exampleDir" validate
+            terraform -chdir="$exampleDir" plan -refresh=false -lock=false -input=false -out=tfplan
+            terraform -chdir="$exampleDir" show -json tfplan > "$exampleDir/plan.json"
+            checkov -f "$exampleDir/plan.json" --framework terraform_plan -o json --config-file .checkov.yaml
+          done
