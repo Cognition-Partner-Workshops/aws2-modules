@@ -12,6 +12,7 @@ Reusable Terraform modules for secure AWS application infrastructure. Each modul
 | `sqs-queue` | KMS-encrypted queue and DLQ with redrive and TLS-only policies. |
 | `lambda-function` | KMS-protected Lambda function, encrypted logs, tracing, and dead-letter destination. |
 | `rds-postgres` | Encrypted, Multi-AZ PostgreSQL with managed credentials and constrained networking. |
+| `elasticache-redis` | Encrypted, Multi-AZ Redis replication group with a rotating AUTH token and constrained networking. |
 
 ## Usage
 
