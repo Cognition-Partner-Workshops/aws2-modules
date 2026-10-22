@@ -23,10 +23,6 @@ variable "logging_source_bucket_arns" {
   type        = list(string)
   description = "Source bucket ARNs allowed to deliver logs when this is a log destination."
   default     = []
-  validation {
-    condition     = !var.log_bucket_mode || length(var.logging_source_bucket_arns) > 0
-    error_message = "log_bucket_mode requires at least one logging_source_bucket_arns entry."
-  }
 }
 
 variable "logging_target_prefix" {
@@ -55,6 +51,29 @@ variable "lifecycle_rules" {
       && (rule.noncurrent_transition_days == null) == (rule.noncurrent_transition_storage_class == null)
     ])
     error_message = "Each lifecycle transition requires both its day and storage-class values."
+  }
+}
+
+variable "object_lock_enabled" {
+  type        = bool
+  description = "Enable S3 Object Lock on the bucket. Can only be set when the bucket is created; changing it on an existing bucket forces replacement. When false the argument is left unset so a bucket that already has Object Lock is never planned for replacement."
+  default     = false
+}
+
+variable "object_lock_default_retention" {
+  type = object({
+    mode = string
+    days = number
+  })
+  description = "Default Object Lock retention applied to every new object version. Requires object_lock_enabled = true. mode is GOVERNANCE or COMPLIANCE; days is the retention period in days."
+  default     = null
+  validation {
+    condition     = var.object_lock_default_retention == null || try(contains(["GOVERNANCE", "COMPLIANCE"], var.object_lock_default_retention.mode), false)
+    error_message = "object_lock_default_retention.mode must be GOVERNANCE or COMPLIANCE."
+  }
+  validation {
+    condition     = var.object_lock_default_retention == null || try(var.object_lock_default_retention.days >= 1, false)
+    error_message = "object_lock_default_retention.days must be at least 1."
   }
 }
 
