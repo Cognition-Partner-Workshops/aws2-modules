@@ -1,6 +1,7 @@
 resource "aws_s3_bucket" "this" {
-  bucket = var.bucket_name
-  tags   = var.tags
+  bucket              = var.bucket_name
+  object_lock_enabled = var.object_lock_enabled ? true : null
+  tags                = var.tags
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
@@ -26,6 +27,27 @@ resource "aws_s3_bucket_versioning" "this" {
   bucket = aws_s3_bucket.this.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_object_lock_configuration" "this" {
+  count  = var.object_lock_default_retention == null ? 0 : 1
+  bucket = aws_s3_bucket.this.id
+
+  rule {
+    default_retention {
+      mode = var.object_lock_default_retention.mode
+      days = var.object_lock_default_retention.days
+    }
+  }
+
+  depends_on = [aws_s3_bucket_versioning.this]
+
+  lifecycle {
+    precondition {
+      condition     = var.object_lock_enabled
+      error_message = "object_lock_default_retention requires object_lock_enabled = true; Object Lock can only be turned on when the bucket is created."
+    }
   }
 }
 
@@ -119,6 +141,13 @@ data "aws_iam_policy_document" "this" {
 resource "aws_s3_bucket_policy" "this" {
   bucket = aws_s3_bucket.this.id
   policy = data.aws_iam_policy_document.this.json
+
+  lifecycle {
+    precondition {
+      condition     = !var.log_bucket_mode || length(var.logging_source_bucket_arns) > 0
+      error_message = "log_bucket_mode requires at least one logging_source_bucket_arns entry."
+    }
+  }
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "this" {

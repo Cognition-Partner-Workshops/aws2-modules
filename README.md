@@ -6,7 +6,7 @@ Reusable Terraform modules for secure AWS application infrastructure. Each modul
 
 | Module | Purpose |
 |---|---|
-| `s3-bucket` | Versioned, encrypted S3 bucket, access logging, lifecycle, and restrictive bucket policy. |
+| `s3-bucket` | Versioned, encrypted S3 bucket, access logging, lifecycle, optional Object Lock, and restrictive bucket policy. |
 | `kms-key` | Rotating KMS key with scoped administration and data-use permissions. |
 | `iam-role` | Workload role with a required permissions boundary and validated inline policies. |
 | `sqs-queue` | KMS-encrypted queue and DLQ with redrive and TLS-only policies. |
